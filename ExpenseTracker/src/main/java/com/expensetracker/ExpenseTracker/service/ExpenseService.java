@@ -1,7 +1,6 @@
 package com.expensetracker.ExpenseTracker.service;
-
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import com.expensetracker.ExpenseTracker.dto.CategorySummaryDTO;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -107,6 +106,44 @@ public Double getTotalExpense(Long userId) {
 public Double getBalance(Long userId) {
 
     return getTotalIncome(userId) - getTotalExpense(userId);
+}
+public List<CategorySummaryDTO> getCategorySummary(Long userId) {
+
+    User user = userRepository.findById(userId)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+
+    List<Expense> expenses = expenseRepository.findByUser(user);
+
+    Map<String, Double> map = new HashMap<>();
+
+    for (Expense expense : expenses) {
+
+        if (!expense.getType().equalsIgnoreCase("EXPENSE")) {
+            continue;
+        }
+
+        map.put(
+                expense.getCategory(),
+                map.getOrDefault(expense.getCategory(), 0.0)
+                        + expense.getAmount()
+        );
+    }
+
+    List<CategorySummaryDTO> result = new ArrayList<>();
+
+    for (String category : map.keySet()) {
+
+        result.add(
+                new CategorySummaryDTO(
+                        category,
+                        map.get(category)
+                )
+        );
+
+    }
+
+    return result;
+
 }
 
 }

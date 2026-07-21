@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 
 import com.expensetracker.ExpenseTracker.dto.LoginRequest;
 import com.expensetracker.ExpenseTracker.dto.RegisterRequest;
+import com.expensetracker.ExpenseTracker.dto.LoginResponse;
 import com.expensetracker.ExpenseTracker.service.AuthService;
 
 @RestController
@@ -27,10 +28,11 @@ public class AuthController {
 
     // Login User
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody LoginRequest request) {
+public ResponseEntity<LoginResponse> login(
+        @RequestBody LoginRequest request) {
 
-        String token = authService.login(request);
+    LoginResponse response = authService.login(request);
 
-        return ResponseEntity.ok(token);
-    }
+    return ResponseEntity.ok(response);
+}
 }

@@ -8,9 +8,11 @@ import org.springframework.stereotype.Service;
 
 import com.expensetracker.ExpenseTracker.dto.LoginRequest;
 import com.expensetracker.ExpenseTracker.dto.RegisterRequest;
+import com.expensetracker.ExpenseTracker.dto.LoginResponse;
 import com.expensetracker.ExpenseTracker.model.User;
 import com.expensetracker.ExpenseTracker.repository.UserRepository;
 import com.expensetracker.ExpenseTracker.security.JwtUtil;
+
 
 @Service
 public class AuthService {
@@ -44,25 +46,32 @@ public class AuthService {
     }
 
     // Login User
-    public String login(LoginRequest request) {
+    public LoginResponse login(LoginRequest request) {
 
-        Optional<User> optionalUser =
-                userRepository.findByEmail(request.getEmail());
+    Optional<User> optionalUser =
+            userRepository.findByEmail(request.getEmail());
 
-        if (optionalUser.isEmpty()) {
-            return "Invalid Email";
-        }
-
-        User user = optionalUser.get();
-
-        if (!passwordEncoder.matches(request.getPassword(),
-                user.getPassword())) {
-
-            return "Invalid Password";
-        }
-
-        // Generate JWT Token
-        return jwtUtil.generateToken(user.getEmail());
+    if (optionalUser.isEmpty()) {
+        throw new RuntimeException("Invalid Email");
     }
+
+    User user = optionalUser.get();
+
+    if (!passwordEncoder.matches(
+            request.getPassword(),
+            user.getPassword())) {
+
+        throw new RuntimeException("Invalid Password");
+    }
+
+    String token = jwtUtil.generateToken(user.getEmail());
+
+    return new LoginResponse(
+            token,
+            user.getId(),
+            user.getName(),
+            user.getEmail()
+    );
+}
 
 }
